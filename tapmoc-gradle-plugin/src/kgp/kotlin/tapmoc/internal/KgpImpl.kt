@@ -1,6 +1,5 @@
 package tapmoc.internal
 
-import java.lang.reflect.Method
 import org.gradle.api.Project
 import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.provider.ProviderFactory
@@ -19,22 +18,12 @@ import org.jetbrains.kotlin.gradle.plugin.KotlinTarget
 import org.jetbrains.kotlin.gradle.plugin.KotlinTargetsContainer
 import org.jetbrains.kotlin.gradle.plugin.getKotlinPluginVersion
 
-private var method: Method? = null
-private var firstTime = true
-
-@Synchronized
-private fun compilerOptionsMethod(): Method? {
-  if (firstTime) {
-    firstTime = false
-
-    method = try {
-      KotlinMultiplatformExtension::class.java.getMethod("getCompilerOptions")
-    } catch (_: NoSuchMethodException) {
-      null
-    }
+private val compilerOptionsMethod by lazy {
+  try {
+    KotlinMultiplatformExtension::class.java.getMethod("getCompilerOptions")
+  } catch (_: NoSuchMethodException) {
+    null
   }
-
-  return method
 }
 
 private class KgpImpl(private val dependencyHandler: DependencyHandler, extension: Any, private val providers: ProviderFactory, private val kgpVersion: String) : Kgp {
@@ -79,7 +68,7 @@ private class KgpImpl(private val dependencyHandler: DependencyHandler, extensio
         }
       }
       is KotlinMultiplatformExtension -> {
-        val compilerOptions = compilerOptionsMethod()
+        val compilerOptions = compilerOptionsMethod
         if (compilerOptions != null) {
           (compilerOptions.invoke(kotlinProjectExtension) as KotlinCommonCompilerOptions).apply {
             /**
