@@ -4,7 +4,7 @@ import starlight from '@astrojs/starlight';
 
 export default defineConfig({
 	site: 'https://gradleup.com',
-	base: '/Tapmoc',
+	base: '/tapmoc',
 	integrations: [
 		starlight({
 			title: 'Tapmoc',
