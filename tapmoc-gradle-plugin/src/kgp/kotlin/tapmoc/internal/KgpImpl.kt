@@ -140,6 +140,12 @@ private class KgpImpl(private val dependencyHandler: DependencyHandler, extensio
             }
           }
         }
+        /**
+         * We also need to fight AGP there: https://cs.android.com/android-studio/platform/tools/base/+/mirror-goog-studio-main:build-system/gradle-core/src/main/java/com/android/build/gradle/internal/utils/kgpUtils.kt;l=386;drc=24548ccac3813558373462f04d14e6738141624d
+         *
+         * This is assuming there will always be an "api" configuration...
+         */
+        dependencyHandler.add("api", "org.jetbrains.kotlin:kotlin-stdlib:${version}")
       }
     }
   }
