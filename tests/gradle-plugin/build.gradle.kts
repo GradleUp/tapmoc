@@ -2,7 +2,8 @@ import tapmoc.Severity
 
 plugins {
   id("com.gradleup.tapmoc")
-  `embedded-kotlin`
+  // Use a version of KGP that can target 1.8
+  id("org.jetbrains.kotlin.jvm").version("2.2.10")
   id("java-gradle-plugin") // needs to be before check.publication
   id("check.publication")
 }
