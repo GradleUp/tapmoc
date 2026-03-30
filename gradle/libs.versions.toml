@@ -39,5 +39,5 @@ librarian = { id = "com.gradleup.librarian", version = "0.2.2-SNAPSHOT-a938d327d
 #noinspection NewerVersionAvailable
 nmcp = { id = "com.gradleup.nmcp", version.ref = "nmcp" }
 #noinspection NewerVersionAvailable
-tapmoc = { id = "com.gradleup.tapmoc", version = "0.4.1-SNAPSHOT-faf78a255ccac5c09c671613b60c0d9d8173c904" }
+tapmoc = { id = "com.gradleup.tapmoc", version = "0.4.1" }
 gratatouille = { id = "com.gradleup.gratatouille", version.ref = "gratatouille-build-time" }
