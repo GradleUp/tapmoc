@@ -7,6 +7,7 @@ pluginManagement {
         content {
           includeModule("com.gradleup.gratatouille", "gratatouille-processor")
           includeModule("com.gradleup.nmcp", "nmcp-tasks")
+          includeModule("com.gradleup.tapmoc", "tapmoc-tasks")
         }
       }
     }
