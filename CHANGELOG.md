@@ -1,3 +1,13 @@
+# 0.4.1
+_2026-03-30_
+
+Couple of bugfixes:
+
+* [FIX] Fix checking dependencies on Android projects (https://github.com/GradleUp/tapmoc/pull/83)
+  * Android projects expose several variants, and we need to set the variant and artifact type attributes to avoid disambiguation errors when resolving the runtime/api dependencies.
+* [FIX] Fix the kotlin-stdlib exposed by `tapmoc-gradle-plugin` ([faf78a25](https://github.com/GradleUp/tapmoc/commit/faf78a255ccac5c09c671613b60c0d9d8173c904), [a0489f6b](https://github.com/GradleUp/tapmoc/commit/a0489f6ba6d6e6013d4d9f227f80ee685a86d05f), ...)
+  * 0.4.0 added new compilations that pulled `kotlin-stdlib:2.3.0` automatically. 0.4.1 now explicitely add the appropriate version of `kotlin-stdlib` to all compilations.
+
 # 0.4.0
 _2025-12-29_
 
