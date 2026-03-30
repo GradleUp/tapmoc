@@ -7,7 +7,3 @@ pluginManagement {
 
 includeBuild("../../")
 includeBuild("../build-logic")
-
-fun toto(settings: Settings) {
-  settings.layout.rootDirectory.files()
-}

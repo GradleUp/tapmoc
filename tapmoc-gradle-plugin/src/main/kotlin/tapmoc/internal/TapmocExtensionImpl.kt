@@ -4,6 +4,7 @@ import org.gradle.api.NamedDomainObjectSet
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.component.ModuleComponentIdentifier
+import org.gradle.api.attributes.Attribute
 import org.gradle.api.attributes.Category
 import org.gradle.api.attributes.Usage
 import org.gradle.api.provider.Property
@@ -94,6 +95,41 @@ internal abstract class TapmocExtensionImpl(private val project: Project) : Tapm
       it.isVisible = false
 
       it.attributes.attribute(Usage.USAGE_ATTRIBUTE, project.objects.named(Usage::class.java, usage))
+      /**
+       * For Android, select "release" by default. This is probably not 100% correct, but fixes errors like those:
+       *
+       * ```
+       * Could not determine the dependencies of task ':openfeedback-m3:tapmocCheckClassFileVersions'.
+       * > Could not resolve all dependencies for configuration ':openfeedback-m3:tapmocRuntimeDependencies'.
+       *    > Could not resolve project :openfeedback-resources.
+       *      Required by:
+       *          project :openfeedback-m3
+       *       > The consumer was configured to find a component for use during runtime. However we cannot choose between the following variants of project :openfeedback-resources:
+       *           - debugRuntimeElements
+       *           - releaseRuntimeElements
+       *         All of them match the consumer attributes:
+       *           - Variant 'debugRuntimeElements' capability 'io.openfeedback:openfeedback-resources:1.0.0-alpha.5-SNAPSHOT' declares a component for use during runtime:
+       *               - Unmatched attributes:
+       *                   - Provides a library but the consumer didn't ask for it
+       *                   - Provides attribute 'com.android.build.api.attributes.AgpVersionAttr' with value '8.9.0' but the consumer didn't ask for it
+       *                   - Provides attribute 'com.android.build.api.attributes.BuildTypeAttr' with value 'debug' but the consumer didn't ask for it
+       *                   - Provides attribute 'com.android.build.gradle.internal.attributes.VariantAttr' with value 'debug' but the consumer didn't ask for it
+       *                   - Provides attribute 'org.gradle.jvm.environment' with value 'android' but the consumer didn't ask for it
+       *                   - Provides attribute 'org.jetbrains.kotlin.platform.type' with value 'androidJvm' but the consumer didn't ask for it
+       *           - Variant 'releaseRuntimeElements' capability 'io.openfeedback:openfeedback-resources:1.0.0-alpha.5-SNAPSHOT' declares a component for use during runtime:
+       *               - Unmatched attributes:
+       *                   - Provides a library but the consumer didn't ask for it
+       *                   - Provides attribute 'com.android.build.api.attributes.AgpVersionAttr' with value '8.9.0' but the consumer didn't ask for it
+       *                   - Provides attribute 'com.android.build.api.attributes.BuildTypeAttr' with value 'release' but the consumer didn't ask for it
+       *                   - Provides attribute 'com.android.build.gradle.internal.attributes.VariantAttr' with value 'release' but the consumer didn't ask for it
+       *                   - Provides attribute 'org.gradle.jvm.environment' with value 'android' but the consumer didn't ask for it
+       *                   - Provides attribute 'org.jetbrains.kotlin.platform.type' with value 'androidJvm' but the consumer didn't ask for it
+       * ```
+       *
+       * I'm expecting the attributes to be ignored in the other cases because "missing attributes are a match" 🤞
+       */
+      it.attributes.attribute(Attribute.of("com.android.build.gradle.internal.attributes.VariantAttr", String::class.java), "release")
+      it.attributes.attribute(Attribute.of("artifactType", String::class.java), "jar")
     }
 
     var firstTime = true
