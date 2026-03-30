@@ -8,6 +8,13 @@ plugins {
 
 Librarian.module(project)
 
+kotlin {
+  compilerOptions {
+    // "Language version 2.0 is deprecated and its support will be removed in a future version of Kotlin"
+    freeCompilerArgs.add("-Xsuppress-version-warnings")
+  }
+}
+
 val optionalPlugins = mapOf(
   "agp" to libs.agp,
   "kgp" to libs.kgp.compile.only,
