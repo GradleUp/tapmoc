@@ -35,7 +35,7 @@ agp9-kmp = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp
 #noinspection SimilarGradleDependency
 agp9-library = { id = "com.android.library", version.ref = "agp9" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
-librarian = { id = "com.gradleup.librarian", version = "0.2.2-SNAPSHOT-a938d327d264e6ecf3880659ebc1401d09370897" }
+librarian = { id = "com.gradleup.librarian", version = "0.2.2-SNAPSHOT-61bc563d1de1a3cbe98eb68cefd241d5c46d5da7" }
 #noinspection NewerVersionAvailable
 nmcp = { id = "com.gradleup.nmcp", version.ref = "nmcp" }
 #noinspection NewerVersionAvailable
