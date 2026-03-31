@@ -5,7 +5,7 @@ buildscript {
     resolutionStrategy {
       eachDependency {
         if (this.requested.name == "dokka-gradle-plugin") {
-          // 
+          // https://github.com/Kotlin/dokka/issues/4492
           useVersion("2.1.0")
         }
       }
