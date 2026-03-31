@@ -1,5 +1,18 @@
 import com.gradleup.librarian.gradle.Librarian
 
+buildscript {
+  this.configurations.configureEach {
+    resolutionStrategy {
+      eachDependency {
+        if (this.requested.name == "dokka-gradle-plugin") {
+          // 
+          useVersion("2.1.0")
+        }
+      }
+    }
+  }
+}
+
 plugins {
   alias(libs.plugins.kgp.jvm).apply(false)
   alias(libs.plugins.librarian).apply(false)
