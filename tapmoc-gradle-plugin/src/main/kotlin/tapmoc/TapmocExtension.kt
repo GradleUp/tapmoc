@@ -16,13 +16,13 @@ interface TapmocExtension {
   /**
    * Configures the version of Kotlin to target.
    * This version is used as:
+   * - kotlin-stdlib JVM version
    * - languageVersion
    * - apiVersion
-   * - coreLibrariesVersion
-   *
    *
    * @param version the version of Kotlin to target.
-   * This is a string in case you need a specific minor version in `coreLibrariesVersion`
+   * languageVersion and apiVersion only use the `major.minor` (e.g "1.9") of [version].
+   * `kotlin-stdlib` JVM version uses [version] verbatim.
    *
    * Examples: "1.9.0", "1.9.22", "2.0.21", "2.1.20", ...
    */
