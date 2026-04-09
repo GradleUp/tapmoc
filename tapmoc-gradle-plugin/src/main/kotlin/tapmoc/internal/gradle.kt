@@ -36,13 +36,15 @@ internal fun javaVersionForGradle(major: Int): Int {
 
 internal fun parseGradleMajorVersion(gradleVersion: String): Int {
   val c = gradleVersion.split('.')
-  check (c.isNotEmpty()) {
+  val d = c.firstOrNull()
+
+  checkNotNull(d) {
     "Tapmoc: gradleVersion should be in the form `major[.minor[.patch]]` (found '$gradleVersion')"
   }
 
-  val major = c.get(0).toIntOrNull()
+  val major = d.toIntOrNull()
 
-  check (major != null) {
+  checkNotNull(major) {
     "Tapmoc: major version must be an integer (found '$major' in '$gradleVersion')"
   }
 
