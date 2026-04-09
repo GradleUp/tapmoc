@@ -34,17 +34,23 @@ fun Project.configureJavaCompatibility(
 fun Project.configureKotlinCompatibility(
   version: String,
 ) {
-  require(version.split(".").size == 3) {
+  val parts = version.split('.').toMutableList()
+
+  while (parts.size < 3) parts += "0"
+
+  require(parts.size == 3) {
     "Tapmoc: cannot parse Kotlin version '$version'. Expected format is X.Y.Z."
   }
+
+  val fullVersion = parts.joinToString(".")
 
   onKgp {
     val kgpVersion = it.version(this)
     // We're using lexicographic comparison here
-    if (version > kgpVersion) {
-      error("Tapmoc: cannot set compatibility version '$version' because it is higher than the Kotlin Gradle Plugin version '$kgpVersion'")
+    if (fullVersion > kgpVersion) {
+      error("Tapmoc: cannot set compatibility version '$fullVersion' because it is higher than the Kotlin Gradle Plugin version '$kgpVersion'")
     }
-    it.kotlinCompatibility(version)
+    it.kotlinCompatibility(fullVersion)
   }
 }
 
