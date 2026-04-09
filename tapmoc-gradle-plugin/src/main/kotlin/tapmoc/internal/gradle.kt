@@ -18,7 +18,8 @@ internal fun kotlinVersionForGradle(major: Int): String {
     major >= 9 -> "2.2.0"
     major >= 8 -> "1.8.0"
     major >= 7 -> "1.4.0"
-    else -> error("Gradle versions < 7.0 are not supported (found '$major')")
+    major >= 5 -> "1.3.0"
+    else -> error("Gradle versions < 5.0 are not supported (found '$major')")
   }
 }
 
