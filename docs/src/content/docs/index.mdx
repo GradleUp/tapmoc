@@ -10,7 +10,7 @@ Tapmoc helps you configure your Java/Kotlin compatibility flags:
 ```kotlin
 tapmoc {
   java(17) // build for Java 17, including source, target and api compatibility
-  kotlin("2.1.0") // build for kotlin 2.1.0, including language and api version
+  kotlin("2.1.0") // build for kotlin 2.1.0, including kotlin-stdlib, language, and api version
 }
 ```
 
@@ -59,7 +59,7 @@ plugins {
 tapmoc {
   // Java takes an int for simplicity
   java(17)
-  // Kotlin takes a string so you have more control of the patch release.
+  // Kotlin takes a string to control the kotlin-stdlib version.
   // languageVersion/apiVersion are configured with the minor version only.
   kotlin("2.1.0")
 
