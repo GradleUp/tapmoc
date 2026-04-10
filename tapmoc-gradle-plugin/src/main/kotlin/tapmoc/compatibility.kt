@@ -1,10 +1,11 @@
 package tapmoc
 
-import tapmoc.internal.onAgp
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 import org.gradle.api.tasks.compile.JavaCompile
+import tapmoc.internal.onAgp
 import tapmoc.internal.onKgp
+import tapmoc.internal.setAndDisallowChanges
 
 fun Project.configureJavaCompatibility(
   javaVersion: Int,
@@ -14,7 +15,7 @@ fun Project.configureJavaCompatibility(
    */
   tasks.withType(JavaCompile::class.java).configureEach {
     if (!isAndroidJavaCompileTask(it.name)) {
-      it.options.release.set(javaVersion)
+      it.options.release.setAndDisallowChanges(javaVersion)
     }
   }
 

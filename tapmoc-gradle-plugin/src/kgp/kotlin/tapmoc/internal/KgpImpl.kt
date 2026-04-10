@@ -4,6 +4,7 @@ import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.NamedDomainObjectSet
 import org.gradle.api.Project
 import org.gradle.api.artifacts.dsl.DependencyHandler
+import org.gradle.api.provider.Property
 import org.gradle.api.provider.ProviderFactory
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinAndroidProjectExtension
@@ -49,7 +50,7 @@ private class KgpImpl(private val dependencyHandler: DependencyHandler, extensio
            * jvmTarget needs to be set as well, or we get an error such as
            * e: '-Xjdk-release=11' option conflicts with '-jvm-target 17'. Please remove the '-jvm-target' option
            */
-          this.jvmTarget.set(version.toJvmTarget())
+          jvmTarget.setAndDisallowChanges(version.toJvmTarget())
         }
       }
     }
@@ -60,14 +61,14 @@ private class KgpImpl(private val dependencyHandler: DependencyHandler, extensio
     when (kotlinProjectExtension) {
       is KotlinAndroidProjectExtension -> {
         kotlinProjectExtension.compilerOptions {
-          apiVersion.set(kotlinVersion)
-          languageVersion.set(kotlinVersion)
+          apiVersion.setAndDisallowChanges(kotlinVersion)
+          languageVersion.setAndDisallowChanges(kotlinVersion)
         }
       }
       is KotlinJvmProjectExtension -> {
         kotlinProjectExtension.compilerOptions {
-          apiVersion.set(kotlinVersion)
-          languageVersion.set(kotlinVersion)
+          apiVersion.setAndDisallowChanges(kotlinVersion)
+          languageVersion.setAndDisallowChanges(kotlinVersion)
         }
       }
       is KotlinMultiplatformExtension -> {
@@ -80,8 +81,8 @@ private class KgpImpl(private val dependencyHandler: DependencyHandler, extensio
              *
              * See https://www.jetbrains.com/help/kotlin-multiplatform-dev/multiplatform-dsl-reference.html#compiler-options
              */
-            apiVersion.set(kotlinVersion)
-            languageVersion.set(kotlinVersion)
+            apiVersion.setAndDisallowChanges(kotlinVersion)
+            languageVersion.setAndDisallowChanges(kotlinVersion)
           }
         } else {
           /**
@@ -89,8 +90,8 @@ private class KgpImpl(private val dependencyHandler: DependencyHandler, extensio
            * common source sets, but the final binaries should still target the correct version.
            */
           kotlinProjectExtension.forEachCompilerOptions {
-            apiVersion.set(kotlinVersion)
-            languageVersion.set(kotlinVersion)
+            apiVersion.setAndDisallowChanges(kotlinVersion)
+            languageVersion.setAndDisallowChanges(kotlinVersion)
           }
         }
       }
@@ -229,4 +230,9 @@ internal fun Project.onKgp(block: (Kgp) -> Unit) {
       block(KgpImpl(this.dependencies, extensions.getByName("kotlin"), providers, getKotlinPluginVersion()))
     }
   }
+}
+
+internal fun <T: Any> Property<T>.setAndDisallowChanges(value: T) {
+  set(value)
+  disallowChanges()
 }
