@@ -1,3 +1,15 @@
+
+# 0.4.2
+_2026-04-12_
+
+Version 0.4.2 adds support for getting the Kotlin version for Gradle 5 and improves KDoc. Many thanks @sschuberth for the feedback and contributions in this release.
+
+## What's Changed
+* [NEW] Support getting the Kotlin version for Gradle 5 (#93)
+* [UPDATE] Update nmcp, tapmoc, and librarian versions used to build tapmoc (no runtime impact) (#85, #86, #87)
+* [INFRA] Improve the KDoc of `tapmoc.kotlin()` (#94)
+* [INFRA] Simplify parsing the Gradle major version (#91)
+
 # 0.4.1
 _2026-03-30_
 
