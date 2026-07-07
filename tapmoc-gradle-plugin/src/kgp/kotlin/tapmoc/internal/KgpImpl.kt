@@ -29,7 +29,7 @@ private val compilerOptionsMethod by lazy {
   }
 }
 
-private class KgpImpl(private val dependencyHandler: DependencyHandler, extension: Any, private val providers: ProviderFactory, private val kgpVersion: String) : Kgp {
+private class KgpImpl(private val project: Project, private val dependencyHandler: DependencyHandler, extension: Any, private val providers: ProviderFactory, private val kgpVersion: String) : Kgp {
   private val kotlinProjectExtension: KotlinProjectExtension = extension as KotlinProjectExtension
 
   override fun javaCompatibility(version: Int) {
@@ -102,9 +102,7 @@ private class KgpImpl(private val dependencyHandler: DependencyHandler, extensio
      * See https://youtrack.jetbrains.com/issue/KT-66755/
      */
     val isStdlibDefaultDependencyEnabled =
-      providers.gradleProperty("kotlin.stdlib.default.dependency")
-        .map { it.toBooleanStrictOrNull() != false }
-        .getOrElse(true)
+      project.findProperty("kotlin.stdlib.default.dependency")?.toString()?.toBooleanStrictOrNull() != false
 
     if (isStdlibDefaultDependencyEnabled) {
       /**
@@ -226,7 +224,7 @@ internal fun Project.onKgp(block: (Kgp) -> Unit) {
   plugins.withType(KotlinBasePlugin::class.java).configureEach {
     if(!hasKgp)  {
       hasKgp = true
-      block(KgpImpl(this.dependencies, extensions.getByName("kotlin"), providers, getKotlinPluginVersion()))
+      block(KgpImpl(this, this.dependencies, extensions.getByName("kotlin"), providers, getKotlinPluginVersion()))
     }
   }
 }
