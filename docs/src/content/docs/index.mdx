@@ -63,6 +63,10 @@ tapmoc {
   // languageVersion/apiVersion are configured with the minor version only.
   kotlin("2.1.0")
 
+  // Optional: if you are developing a Gradle plugin, calling gradle() configures
+  // both Java and Kotlin to be compatible with the target Gradle version
+  gradle("8.0.0")
+
   // Optional: fail the build if any api dependency exposes incompatible Kotlin
   // metadata, Kotlin stdlib or Java bytecode version.
   checkDependencies()
@@ -80,6 +84,26 @@ tapmoc {
   // Fail the build if any api dependency exposes incompatible Kotlin metadata,
   // Kotlin stdlib or Java bytecode version.
   checkDependencies()
+}
+```
+
+## Developing Gradle plugins
+
+Gradle is a special runtime environment because:
+* it forces the version of the Kotlin compiler used to compile `build.gradle.kts` files.
+* it forces the version of the Kotlin stdlib used at runtime.
+* It accepts a range of compatible Java version.
+
+Calling `tapmoc.gradle()` configures both Java and Kotlin according to the [compatibility rules listed at in the Gradle docs](https://docs.gradle.org/current/userguide/compatibility.html).
+
+```kotlin
+tapmoc {
+  /**
+   * This is the same as calling
+   * java(8)
+   * kotlin("1.8.0")
+   */
+  gradle("8.0.0")
 }
 ```
 
