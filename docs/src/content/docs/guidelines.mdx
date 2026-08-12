@@ -81,7 +81,7 @@ Gradle is a bit special because it [forces both the version of `kotlin-stdlib` u
 
 **Guidelines**
 
-1. Use an old version of Kotlin in your plugin wiring.
+1. Use the version of Kotlin [compatible with your target Gradle version](https://docs.gradle.org/current/userguide/compatibility.html) in your plugin.
 2. Isolate your task actions and pull dependencies in isolated classloaders.
 
 **Discussion**
