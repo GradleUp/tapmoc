@@ -52,7 +52,7 @@ internal fun tapmocCheckKotlinMetadataVersions(
           ""
         }
 
-        logger.logOrFail(warningAsError, "${fileWithPath.file.path}:$name contains unsupported metadata ${metadata.version} (expected: $kotlinVersion).$extra\nUse `./gradlew dependencies to investigate the dependency tree.")
+        logger.logOrFail(warningAsError, "${fileWithPath.file.path}:$name contains unsupported metadata ${metadata.version} (expected: $kotlinVersion).$extra\nUse `./gradlew dependencies` to investigate the dependency tree.")
       }
     }
   }

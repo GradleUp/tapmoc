@@ -20,7 +20,7 @@ internal fun tapmocCheckKotlinStdlibVersions(
   val supportedVersion = kotlinVersion.toMinorVersion()
   kotlinStdlibVersions.forEach { version ->
     if (version.toMinorVersion() > supportedVersion) {
-      logger.logOrFail(warningAsError, "Found incompatible kotlin-stdlib: '$version'. Maximum supported is '$supportedVersion'. Use `./gradlew dependencies to investigate the dependency tree.")
+      logger.logOrFail(warningAsError, "Found incompatible kotlin-stdlib: '$version'. Maximum supported is '$supportedVersion'. Use `./gradlew dependencies` to investigate the dependency tree.")
     }
   }
 
