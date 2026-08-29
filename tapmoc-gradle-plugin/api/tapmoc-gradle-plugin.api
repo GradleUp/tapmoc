@@ -16,7 +16,9 @@ public abstract interface class tapmoc/TapmocExtension {
 	public abstract fun checkDependencies ()V
 	public abstract fun checkDependencies (Ltapmoc/Severity;)V
 	public abstract fun checkJavaClassFiles (Ljava/lang/String;Ltapmoc/Severity;)V
+	public abstract fun checkJavaClassFiles (Ltapmoc/Severity;)V
 	public abstract fun checkKotlinMetadata (Ljava/lang/String;Ltapmoc/Severity;)V
+	public abstract fun checkKotlinMetadata (Ltapmoc/Severity;)V
 	public abstract fun checkKotlinStdlibs (Ljava/lang/String;Ltapmoc/Severity;)V
 	public abstract fun checkKotlinStdlibs (Ltapmoc/Severity;)V
 	public abstract fun checkRuntimeDependencies (Ltapmoc/Severity;)V

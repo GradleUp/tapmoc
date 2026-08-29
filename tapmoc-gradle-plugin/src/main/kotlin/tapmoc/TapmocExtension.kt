@@ -78,6 +78,20 @@ interface TapmocExtension {
   fun checkJavaClassFiles(configuration: String, severity: Severity)
 
   /**
+   * This is equivalent to calling `checkJavaClassFiles(runtimeConfiguration, severity)`.
+   *
+   * Where:
+   * - `runtimeConfiguration` is the outgoing variant containing the runtime dependencies (typically, "runtimeElements").
+   *
+   * The actual name of the configurations is guessed depending on the applied plugins (Jvm/kmp/android/etc...).
+   *
+   * If the guessing didn't work, call [checkJavaClassFiles] manually.
+   *
+   * @see checkJavaClassFiles
+   */
+  fun checkJavaClassFiles(severity: Severity)
+
+  /**
    * Checks that the api dependencies Kotlin metadata is compatible with the target Kotlin version.
    *
    * Thanks to Kotlin [best effort n + 1 forward compatibility guarantee](https://kotlinlang.org/docs/kotlin-evolution-principles.html#evolving-the-binary-format),
@@ -87,6 +101,20 @@ interface TapmocExtension {
    * @param severity The severity level for the check.
    */
   fun checkKotlinMetadata(configuration: String, severity: Severity)
+
+  /**
+   * This is equivalent to calling `checkKotlinMetadata(apiConfiguration, severity)`.
+   *
+   * Where:
+   * - `apiConfiguration` is the outgoing variant containing the runtime dependencies (typically, "apiConfiguration").
+   *
+   * The actual name of the configurations is guessed depending on the applied plugins (Jvm/kmp/android/etc...).
+   *
+   * If the guessing didn't work, call [checkKotlinMetadata] manually.
+   *
+   * @see checkKotlinMetadata
+   */
+  fun checkKotlinMetadata(severity: Severity)
 
   /**
    * Checks that the runtime dependencies do not contain a version of `kotlin-stdlib` higher than the target Kotlin version.
@@ -104,7 +132,7 @@ interface TapmocExtension {
    * This is equivalent to calling `checkKotlinStdlibs(runtimeConfiguration, severity)`.
    *
    * Where:
-   * - `runtimeConfiguration` is the outgoing variant containing the runtime dependencies (typically, "apiElements").
+   * - `runtimeConfiguration` is the outgoing variant containing the runtime dependencies (typically, "runtimElements").
    *
    * The actual name of the configurations is guessed depending on the applied plugins (Jvm/kmp/android/etc...).
    *

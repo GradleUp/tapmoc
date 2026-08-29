@@ -85,6 +85,14 @@ internal abstract class TapmocExtensionImpl(private val project: Project) : Tapm
     addToCheckTask(checkJavaClassFiles)
   }
 
+  override fun checkJavaClassFiles(severity: Severity) {
+    reactToPlugins(
+      onApi = {},
+      onRuntime = { checkJavaClassFiles(it, severity)}
+    )
+  }
+
+
   override fun checkKotlinMetadata(configuration: String, severity: Severity) {
     val checkKotlinMetadatas = project.registerTapmocCheckKotlinMetadataVersionsTask(
       taskName = lowerCameCase("tapmoc", "check", configuration, "KotlinMetadata"),
@@ -94,6 +102,14 @@ internal abstract class TapmocExtensionImpl(private val project: Project) : Tapm
     )
     addToCheckTask(checkKotlinMetadatas)
   }
+
+  override fun checkKotlinMetadata(severity: Severity) {
+    reactToPlugins(
+      onApi = {checkKotlinMetadata(it, severity) },
+      onRuntime = {}
+    )
+  }
+
 
   override fun checkKotlinStdlibs(configuration: String, severity: Severity) {
     val checkKotlinStdlibs = project.registerTapmocCheckKotlinStdlibVersionsTask(
@@ -120,6 +136,7 @@ internal abstract class TapmocExtensionImpl(private val project: Project) : Tapm
       onRuntime = { checkKotlinStdlibs(it, severity) }
     )
   }
+
   override fun checkDependencies() {
     checkDependencies(Severity.ERROR)
   }
