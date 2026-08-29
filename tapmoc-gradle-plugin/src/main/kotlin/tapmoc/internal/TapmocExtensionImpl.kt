@@ -1,14 +1,13 @@
 package tapmoc.internal
 
-import org.gradle.api.NamedDomainObjectSet
+import org.gradle.api.NamedDomainObjectProvider
 import org.gradle.api.Project
+import org.gradle.api.UnknownDomainObjectException
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.component.ModuleComponentIdentifier
-import org.gradle.api.attributes.Attribute
-import org.gradle.api.attributes.Category
-import org.gradle.api.attributes.Usage
+import org.gradle.api.file.FileCollection
 import org.gradle.api.provider.Property
-import org.gradle.api.provider.Provider
+import org.gradle.api.tasks.TaskProvider
 import org.gradle.language.base.plugins.LifecycleBasePlugin
 import tapmoc.Severity
 import tapmoc.TapmocExtension
@@ -19,128 +18,14 @@ import tapmoc.task.registerTapmocCheckKotlinMetadataVersionsTask
 import tapmoc.task.registerTapmocCheckKotlinStdlibVersionsTask
 
 internal abstract class TapmocExtensionImpl(private val project: Project) : TapmocExtension {
-  abstract val javaClassFilesSeverity: Property<Severity>
-  abstract val kotlinMetadataSeverity: Property<Severity>
-  abstract val kotlinStdlibSeverity: Property<Severity>
-
   abstract val kotlinVersionProvider: Property<String>
   abstract val javaVersionProvider: Property<Int>
 
-  init {
-    javaClassFilesSeverity.convention(Severity.IGNORE)
-    kotlinMetadataSeverity.convention(Severity.IGNORE)
-    kotlinStdlibSeverity.convention(Severity.IGNORE)
-
-    val apiDependencies = configuration("tapmocApiDependencies", Usage.JAVA_API)
-    val runtimeDependencies = configuration("tapmocRuntimeDependencies", Usage.JAVA_RUNTIME)
-
-    val checkJavaClassFiles = project.registerTapmocCheckClassFileVersionsTask(
-      warningAsError = javaClassFilesSeverity.map { it == Severity.ERROR },
-      javaVersion = javaVersionProvider,
-      jarFiles = project.files(apiDependencies, runtimeDependencies)
-    )
-    checkJavaClassFiles.configure {
-      it.enabled = javaClassFilesSeverity.get() != Severity.IGNORE
-    }
-
-    val checkKotlinMetadatas = project.registerTapmocCheckKotlinMetadataVersionsTask(
-      warningAsError = kotlinMetadataSeverity.map { it == Severity.ERROR },
-      kotlinVersion = kotlinVersionProvider,
-      files = project.files(apiDependencies),
-    )
-    checkKotlinMetadatas.configure {
-      it.enabled = kotlinMetadataSeverity.get() != Severity.IGNORE
-    }
-
-    val checkKotlinStdlibs = project.registerTapmocCheckKotlinStdlibVersionsTask(
-      warningAsError = kotlinStdlibSeverity.map { it == Severity.ERROR },
-      kotlinVersion = kotlinVersionProvider,
-      kotlinStdlibVersions = runtimeDependencies.map {
-        it.incoming.resolutionResult.allComponents
-          .mapNotNull { (it.id as? ModuleComponentIdentifier) }
-          .filter {
-            it.group == "org.jetbrains.kotlin" && it.module == "kotlin-stdlib"
-          }.map {
-            it.version
-          }.toSet()
-      },
-    )
-    checkKotlinStdlibs.configure {
-      it.enabled = kotlinStdlibSeverity.get() != Severity.IGNORE
-    }
-
+  private fun addToCheckTask(taskProvider: TaskProvider<*>) {
     project.plugins.withType(LifecycleBasePlugin::class.java) {
       project.tasks.named(LifecycleBasePlugin.CHECK_TASK_NAME).configure {
-        it.dependsOn(checkKotlinStdlibs)
-        it.dependsOn(checkKotlinMetadatas)
-        it.dependsOn(checkJavaClassFiles)
+        it.dependsOn(taskProvider)
       }
-    }
-  }
-
-  /**
-   * Returns a Provider that configures the underlying configuration the first time
-   * it is accessed.
-   *
-   * We cannot use the regular `.configure{}` because the generated accessors call it too
-   * early.
-   * We also need it to be lazy because AGP/KGP set their attributes later in the lifecycle.
-   *
-   * See https://github.com/gradle/gradle/issues/36147
-   */
-  private fun configuration(name: String, usage: String): Provider<Configuration> {
-    val provider = project.configurations.register(name) {
-      it.isCanBeConsumed = false
-      it.isCanBeResolved = true
-      it.isVisible = false
-
-      it.attributes.attribute(Usage.USAGE_ATTRIBUTE, project.objects.named(Usage::class.java, usage))
-      /**
-       * For Android, select "release" by default. This is probably not 100% correct, but fixes errors like those:
-       *
-       * ```
-       * Could not determine the dependencies of task ':openfeedback-m3:tapmocCheckClassFileVersions'.
-       * > Could not resolve all dependencies for configuration ':openfeedback-m3:tapmocRuntimeDependencies'.
-       *    > Could not resolve project :openfeedback-resources.
-       *      Required by:
-       *          project :openfeedback-m3
-       *       > The consumer was configured to find a component for use during runtime. However we cannot choose between the following variants of project :openfeedback-resources:
-       *           - debugRuntimeElements
-       *           - releaseRuntimeElements
-       *         All of them match the consumer attributes:
-       *           - Variant 'debugRuntimeElements' capability 'io.openfeedback:openfeedback-resources:1.0.0-alpha.5-SNAPSHOT' declares a component for use during runtime:
-       *               - Unmatched attributes:
-       *                   - Provides a library but the consumer didn't ask for it
-       *                   - Provides attribute 'com.android.build.api.attributes.AgpVersionAttr' with value '8.9.0' but the consumer didn't ask for it
-       *                   - Provides attribute 'com.android.build.api.attributes.BuildTypeAttr' with value 'debug' but the consumer didn't ask for it
-       *                   - Provides attribute 'com.android.build.gradle.internal.attributes.VariantAttr' with value 'debug' but the consumer didn't ask for it
-       *                   - Provides attribute 'org.gradle.jvm.environment' with value 'android' but the consumer didn't ask for it
-       *                   - Provides attribute 'org.jetbrains.kotlin.platform.type' with value 'androidJvm' but the consumer didn't ask for it
-       *           - Variant 'releaseRuntimeElements' capability 'io.openfeedback:openfeedback-resources:1.0.0-alpha.5-SNAPSHOT' declares a component for use during runtime:
-       *               - Unmatched attributes:
-       *                   - Provides a library but the consumer didn't ask for it
-       *                   - Provides attribute 'com.android.build.api.attributes.AgpVersionAttr' with value '8.9.0' but the consumer didn't ask for it
-       *                   - Provides attribute 'com.android.build.api.attributes.BuildTypeAttr' with value 'release' but the consumer didn't ask for it
-       *                   - Provides attribute 'com.android.build.gradle.internal.attributes.VariantAttr' with value 'release' but the consumer didn't ask for it
-       *                   - Provides attribute 'org.gradle.jvm.environment' with value 'android' but the consumer didn't ask for it
-       *                   - Provides attribute 'org.jetbrains.kotlin.platform.type' with value 'androidJvm' but the consumer didn't ask for it
-       * ```
-       *
-       * I'm expecting the attributes to be ignored in the other cases because "missing attributes are a match" 🤞
-       */
-      it.attributes.attribute(Attribute.of("com.android.build.gradle.internal.attributes.VariantAttr", String::class.java), "release")
-      it.attributes.attribute(Attribute.of("artifactType", String::class.java), "jar")
-    }
-
-    var firstTime = true
-    return project.provider {
-      if (firstTime) {
-        project.getConfigurations(usage).forEach {
-          provider.get().extendsFrom(it)
-        }
-        firstTime = false
-      }
-      provider.get()
     }
   }
 
@@ -168,26 +53,146 @@ internal abstract class TapmocExtensionImpl(private val project: Project) : Tapm
     return kotlinVersionForGradle(parseGradleMajorVersion(gradleVersion))
   }
 
+  private fun configurationFor(configuration: String): NamedDomainObjectProvider<Configuration> {
+    val name = lowerCameCase("tapmoc", configuration)
+    var tapmocConfiguration = try {
+      project.configurations.named(name)
+    } catch (_: UnknownDomainObjectException) {
+      null
+    }
+    if (tapmocConfiguration == null) {
+      tapmocConfiguration = project.configurations.register(name) {
+        it.isCanBeConsumed = false
+        it.isCanBeResolved = true
+        it.isVisible = false
+        it.extendsFrom(project.configurations.getByName(configuration))
+      }
+    }
+    return tapmocConfiguration
+  }
+
+  private fun fileCollectionFor(configuration: String): FileCollection {
+    return project.files(configurationFor(configuration))
+  }
+
+  override fun checkJavaClassFiles(configuration: String, severity: Severity) {
+    val checkJavaClassFiles = project.registerTapmocCheckClassFileVersionsTask(
+      taskName = lowerCameCase("tapmoc", "check", configuration, "JavaClassFiles"),
+      warningAsError = project.provider { severity == Severity.ERROR },
+      javaVersion = javaVersionProvider,
+      jarFiles = project.files(fileCollectionFor(configuration))
+    )
+    addToCheckTask(checkJavaClassFiles)
+  }
+
   override fun checkJavaClassFiles(severity: Severity) {
-    javaClassFilesSeverity.set(severity)
+    reactToPlugins(
+      onApi = {},
+      onRuntime = { checkJavaClassFiles(it, severity)}
+    )
+  }
+
+
+  override fun checkKotlinMetadata(configuration: String, severity: Severity) {
+    val checkKotlinMetadatas = project.registerTapmocCheckKotlinMetadataVersionsTask(
+      taskName = lowerCameCase("tapmoc", "check", configuration, "KotlinMetadata"),
+      warningAsError = project.provider { severity == Severity.ERROR },
+      kotlinVersion = kotlinVersionProvider,
+      files = fileCollectionFor(configuration),
+    )
+    addToCheckTask(checkKotlinMetadatas)
   }
 
   override fun checkKotlinMetadata(severity: Severity) {
-    kotlinMetadataSeverity.set(severity)
+    reactToPlugins(
+      onApi = {checkKotlinMetadata(it, severity) },
+      onRuntime = {}
+    )
+  }
+
+
+  override fun checkKotlinStdlibs(configuration: String, severity: Severity) {
+    val checkKotlinStdlibs = project.registerTapmocCheckKotlinStdlibVersionsTask(
+      taskName = lowerCameCase("tapmoc", "check", configuration, "KotlinStdlib"),
+      warningAsError = project.provider { severity == Severity.ERROR },
+      kotlinVersion = kotlinVersionProvider,
+      kotlinStdlibVersions = configurationFor(configuration).map {
+        it.incoming.resolutionResult.allComponents
+          .mapNotNull { (it.id as? ModuleComponentIdentifier) }
+          .filter {
+            it.group == "org.jetbrains.kotlin" && it.module == "kotlin-stdlib"
+          }.map {
+            it.version
+          }.toSet()
+      },
+    )
+
+    addToCheckTask(checkKotlinStdlibs)
   }
 
   override fun checkKotlinStdlibs(severity: Severity) {
-    kotlinStdlibSeverity.set(severity)
+    reactToPlugins(
+      onApi = { },
+      onRuntime = { checkKotlinStdlibs(it, severity) }
+    )
   }
 
   override fun checkDependencies() {
     checkDependencies(Severity.ERROR)
   }
 
+  private fun reactToPlugins(onApi: (String) -> Unit, onRuntime: (String) -> Unit) {
+    var hasJava = false
+    var hasKotlinJvm = false
+    var hasKotlinMultiplatform = false
+
+    project.pluginManager.withPlugin("java") {
+      if (!hasKotlinJvm) {
+        onApi("apiElements")
+        onRuntime("runtimeElements")
+      }
+      hasJava = true
+    }
+    project.pluginManager.withPlugin("org.jetbrains.kotlin.jvm") {
+      if (!hasJava) {
+        onApi("apiElements")
+        onRuntime("runtimeElements")
+      }
+      hasKotlinJvm = true
+    }
+    project.pluginManager.withPlugin("org.jetbrains.kotlin.multiplatform") {
+      onApi("jvmApiElements")
+      onRuntime("jvmRuntimeElements")
+
+      hasKotlinMultiplatform = true
+    }
+    project.pluginManager.withPlugin("com.android.library") {
+      onApi("releaseApiElements")
+      onRuntime("releaseRuntimeElements")
+
+      hasKotlinMultiplatform = true
+    }
+
+    project.afterEvaluate {
+      if (!hasJava && !hasKotlinJvm && !hasKotlinMultiplatform) {
+        val task = project.tasks.findByName("tapmocError")
+        if (task == null) {
+          val task2 = project.tasks.register("tapmocError") {
+            it.doFirst {
+              error("Tapmoc: checkDependencies() didn't find any supported plugin. Please call `checkJavaClassFiles()` and `checkKotlinMetadata()` instead.")
+            }
+          }
+          addToCheckTask(task2)
+        }
+      }
+    }
+  }
   @Suppress("DEPRECATION")
   override fun checkDependencies(severity: Severity) {
-    checkJavaClassFiles(severity)
-    checkKotlinMetadata(severity)
+    reactToPlugins(
+      onApi = { checkKotlinMetadata(it, severity) },
+      onRuntime = { checkJavaClassFiles(it, severity) }
+    )
   }
 
   @Deprecated(
@@ -209,33 +214,15 @@ internal abstract class TapmocExtensionImpl(private val project: Project) : Tapm
   }
 }
 
-/**
- * Retrieves the outgoing configurations for this project.
- *
- * We currently only check the JVM configurations.
- */
-private fun Project.getConfigurations(usage: String): NamedDomainObjectSet<Configuration> {
-  return configurations.matching {
-    it.isCanBeConsumed
-        && it.attributes.getAttribute(Usage.USAGE_ATTRIBUTE)?.name == usage
-        /**
-         * releaseSourcesElements declare the `java-runtime` attribute, and we need to set the category to remove it:
-         *
-         * ```
-         * Attributes
-         *     - com.android.build.api.attributes.AgpVersionAttr          = 8.12.0
-         *     - com.android.build.api.attributes.BuildTypeAttr           = release
-         *     - com.android.build.gradle.internal.attributes.VariantAttr = release
-         *     - org.gradle.category                                      = documentation
-         *     - org.gradle.dependency.bundling                           = external
-         *     - org.gradle.docstype                                      = sources
-         *     - org.gradle.jvm.environment                               = android
-         *     - org.gradle.libraryelements                               = jar
-         *     - org.gradle.usage                                         = java-runtime
-         *     - org.jetbrains.kotlin.platform.type                       = androidJvm
-         * ```
-         */
-        && it.attributes.getAttribute(Category.CATEGORY_ATTRIBUTE)?.name != Category.DOCUMENTATION
-  }
+private fun lowerCameCase(vararg components: String): String {
+  return components
+    .filter { it.isNotEmpty() }
+    .mapIndexed { index, component ->
+      if (index == 0) {
+        component.replaceFirstChar { it.lowercase() }
+      } else {
+        component.replaceFirstChar { it.uppercase() }
+      }
+    }
+    .joinToString("")
 }
-

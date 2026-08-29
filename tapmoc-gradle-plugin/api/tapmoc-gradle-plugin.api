@@ -5,7 +5,6 @@ public final class tapmoc/CompatibilityKt {
 
 public final class tapmoc/Severity : java/lang/Enum {
 	public static final field ERROR Ltapmoc/Severity;
-	public static final field IGNORE Ltapmoc/Severity;
 	public static final field WARNING Ltapmoc/Severity;
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Ltapmoc/Severity;
@@ -16,8 +15,11 @@ public abstract interface class tapmoc/TapmocExtension {
 	public abstract fun checkApiDependencies (Ltapmoc/Severity;)V
 	public abstract fun checkDependencies ()V
 	public abstract fun checkDependencies (Ltapmoc/Severity;)V
+	public abstract fun checkJavaClassFiles (Ljava/lang/String;Ltapmoc/Severity;)V
 	public abstract fun checkJavaClassFiles (Ltapmoc/Severity;)V
+	public abstract fun checkKotlinMetadata (Ljava/lang/String;Ltapmoc/Severity;)V
 	public abstract fun checkKotlinMetadata (Ltapmoc/Severity;)V
+	public abstract fun checkKotlinStdlibs (Ljava/lang/String;Ltapmoc/Severity;)V
 	public abstract fun checkKotlinStdlibs (Ltapmoc/Severity;)V
 	public abstract fun checkRuntimeDependencies (Ltapmoc/Severity;)V
 	public abstract fun gradle (Ljava/lang/String;)V

@@ -72,7 +72,22 @@ interface TapmocExtension {
    *
    * This checks the [class file version](https://docs.oracle.com/javase/specs/jvms/se25/html/jvms-4.html#jvms-4.1).
    *
-   * @param severity The severity level for the check. Defaults to `Severity.IGNORE`.
+   * @param configuration the name of the configuration to check. A new resolvable configuration will be created that extends from that configuration.
+   * @param severity The severity level for the check.
+   */
+  fun checkJavaClassFiles(configuration: String, severity: Severity)
+
+  /**
+   * This is equivalent to calling `checkJavaClassFiles(runtimeConfiguration, severity)`.
+   *
+   * Where:
+   * - `runtimeConfiguration` is the outgoing variant containing the runtime dependencies (typically, "runtimeElements").
+   *
+   * The actual name of the configurations is guessed depending on the applied plugins (Jvm/kmp/android/etc...).
+   *
+   * If the guessing didn't work, call [checkJavaClassFiles] manually.
+   *
+   * @see checkJavaClassFiles
    */
   fun checkJavaClassFiles(severity: Severity)
 
@@ -82,23 +97,65 @@ interface TapmocExtension {
    * Thanks to Kotlin [best effort n + 1 forward compatibility guarantee](https://kotlinlang.org/docs/kotlin-evolution-principles.html#evolving-the-binary-format),
    * dependencies may contain `kotlinTarget + 1` metadata.
    *
-   * @param severity The severity level for the check. Defaults to `Severity.IGNORE`.
+   * @param configuration the name of the configuration to check. A new resolvable configuration will be created that extends from that configuration.
+   * @param severity The severity level for the check.
+   */
+  fun checkKotlinMetadata(configuration: String, severity: Severity)
+
+  /**
+   * This is equivalent to calling `checkKotlinMetadata(apiConfiguration, severity)`.
+   *
+   * Where:
+   * - `apiConfiguration` is the outgoing variant containing the runtime dependencies (typically, "apiConfiguration").
+   *
+   * The actual name of the configurations is guessed depending on the applied plugins (Jvm/kmp/android/etc...).
+   *
+   * If the guessing didn't work, call [checkKotlinMetadata] manually.
+   *
+   * @see checkKotlinMetadata
    */
   fun checkKotlinMetadata(severity: Severity)
 
   /**
    * Checks that the runtime dependencies do not contain a version of `kotlin-stdlib` higher than the target Kotlin version.
    *
-   * In most cases, `kotlin-stdlib` can be safely upgraded and this check is disabled by default.
+   * In most cases, `kotlin-stdlib` can be safely upgraded, and this check is disabled by default.
    *
-   * Enable it if your runtime forces a given version of `kotlin-stdlib`. This is the notably case for Gradle plugins.
+   * Enable it if your runtime forces a given version of `kotlin-stdlib`. This is the case for Gradle plugins in particular.
    *
-   * @param severity The severity level for the check. Defaults to `Severity.IGNORE`.
+   * @param configuration the name of the configuration to check. A new resolvable configuration will be created that extends from that configuration.
+   * @param severity The severity level for the check.
+   */
+  fun checkKotlinStdlibs(configuration: String, severity: Severity)
+
+  /**
+   * This is equivalent to calling `checkKotlinStdlibs(runtimeConfiguration, severity)`.
+   *
+   * Where:
+   * - `runtimeConfiguration` is the outgoing variant containing the runtime dependencies (typically, "runtimElements").
+   *
+   * The actual name of the configurations is guessed depending on the applied plugins (Jvm/kmp/android/etc...).
+   *
+   * If the guessing didn't work, call [checkKotlinStdlibs] manually.
+   *
+   * @see checkKotlinStdlibs
    */
   fun checkKotlinStdlibs(severity: Severity)
 
+
   /**
-   * This is equivalent to calling `checkJavaClassFiles(severity)` and `checkKotlinMetadata(severity)`.
+   * This is equivalent to calling `checkJavaClassFiles(runtimeConfiguration, severity)` and `checkKotlinMetadata(apiConfiguration, severity)`.
+   *
+   * Where:
+   * - `runtimeConfiguration` is the outgoing variant containing the runtime dependencies (typically, "apiElements").
+   * - `apiConfiguration` is the outgoing variant containing the API dependencies (typically, "runtimeElements").
+   *
+   * The actual name of the configurations is guessed depending on the applied plugins (Jvm/kmp/android/etc...).
+   *
+   * If the guessing didn't work, call [checkJavaClassFiles] and [checkKotlinMetadata] manually.
+   *
+   * Note: this doesn't call `checkKotlinStdlibs(runtimeConfigurationm, severity)` as kotlin-stdlib is usually upgraded at runtime. One notable exception is Gradle plugins.
+   * If you are developing a Gradle plugin, you may want to call `checkKotlinStdlibs(severity)`.
    *
    * @see checkJavaClassFiles
    * @see checkKotlinMetadata
@@ -120,7 +177,6 @@ interface TapmocExtension {
 }
 
 enum class Severity {
-  IGNORE,
   WARNING,
   ERROR
 }
