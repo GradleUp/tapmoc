@@ -29,6 +29,7 @@ internal fun tapmocCheckClassFileVersions(
       while (entry != null) {
         if (!entry.isDirectory
           && entry.name.endsWith(".class", ignoreCase = true)
+          && !entry.name.equals("module-info.class") // See https://github.com/GradleUp/tapmoc/issues/108
           && !entry.name.startsWith("META-INF/versions")
           && !entry.name.startsWith("org/gradle/internal/impldep/META-INF/versions/") // See https://github.com/gradle/gradle/issues/24515
         ) {
