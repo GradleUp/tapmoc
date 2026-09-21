@@ -14,6 +14,7 @@ dependencies {
   implementation(libs.kotlin.metadata)
   implementation(libs.asm)
   implementation(libs.gratatouille.tasks.runtime)
+  testImplementation(kotlin("test"))
 }
 
 // Override the default from Librarian, we want to be able to use the latest Kotlin version here.
