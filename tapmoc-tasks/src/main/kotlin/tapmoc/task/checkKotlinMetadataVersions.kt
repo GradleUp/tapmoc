@@ -14,11 +14,15 @@ import kotlin.metadata.jvm.UnstableMetadataApi
 @GTask
 internal fun tapmocCheckKotlinMetadataVersions(
   logger: GLogger,
-  warningAsError: Boolean,
+  severity: String,
   kotlinVersion: String?,
   files: GClasspath,
   output: GOutputFile
 ) {
+  if (severity == "IGNORE") {
+    output.writeText("Tapmoc: check skipped as severity is IGNORE")
+    return
+  }
   if (kotlinVersion == null) {
     output.writeText("Tapmoc: skip checking Kotlin metadata versions as no target Kotlin version is defined")
     return
@@ -52,7 +56,7 @@ internal fun tapmocCheckKotlinMetadataVersions(
           ""
         }
 
-        logger.logOrFail(warningAsError, "${fileWithPath.file.path}:$name contains unsupported metadata ${metadata.version} (expected: $kotlinVersion).$extra\nUse `./gradlew dependencies` to investigate the dependency tree.")
+        logger.logOrFail(severity, "${fileWithPath.file.path}:$name contains unsupported metadata ${metadata.version} (expected: $kotlinVersion).$extra\nUse `./gradlew dependencies` to investigate the dependency tree.")
       }
     }
   }
@@ -72,11 +76,11 @@ private fun File.forEachModuleInfoFile(block: (String, ByteArray) -> Unit) {
   }
 }
 
-internal fun GLogger.logOrFail(warningAsError: Boolean, message: String) {
-  if (warningAsError) {
-    kotlin.error(message)
-  } else {
-    warn("w: $message")
+internal fun GLogger.logOrFail(severity: String, message: String) {
+  when (severity) {
+    "ERROR" -> kotlin.error(message)
+    "WARNING" -> warn("w: $message")
+    "IGNORE" -> Unit
+    else -> kotlin.error("Tapmoc: unknown severity '$severity'. Expected ERROR, WARNING or IGNORE.")
   }
 }
-

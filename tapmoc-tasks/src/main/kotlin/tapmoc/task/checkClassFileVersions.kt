@@ -12,11 +12,15 @@ import java.util.zip.ZipInputStream
 @GTask
 internal fun tapmocCheckClassFileVersions(
   logger: GLogger,
-  warningAsError: Boolean,
+  severity: String,
   jarFiles: GInputFiles,
   javaVersion: Int?,
   output: GOutputFile,
 ) {
+  if (severity == "IGNORE") {
+    output.writeText("Tapmoc: check skipped as severity is IGNORE")
+    return
+  }
   if (javaVersion == null) {
     output.writeText("Tapmoc: skip checking class file versions as no target Java version is defined")
     return
@@ -78,7 +82,7 @@ internal fun tapmocCheckClassFileVersions(
               ""
             }
             logger.logOrFail(
-              warningAsError,
+              severity,
               "${fileWithPath.file.path}:${entry.name} targets $humanReadable which is newer than supported $expectedHuman.$extra",
             )
           }

@@ -38,7 +38,7 @@ class ClassFileVersionTest {
 
     tapmocCheckClassFileVersions(
       logger = SystemGLogger,
-      warningAsError = true,
+      severity = "ERROR",
       jarFiles = listOf(FileWithPath(jarFile, jarFile.name)),
       javaVersion = 8,
       output = output,
@@ -54,7 +54,7 @@ class ClassFileVersionTest {
     val exception = assertFailsWith<IllegalStateException> {
       tapmocCheckClassFileVersions(
         logger = SystemGLogger,
-        warningAsError = true,
+        severity = "ERROR",
         jarFiles = listOf(FileWithPath(jarFile, jarFile.name)),
         javaVersion = 8,
         output = output,
