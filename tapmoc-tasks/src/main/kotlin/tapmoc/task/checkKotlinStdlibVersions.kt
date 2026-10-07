@@ -7,11 +7,15 @@ import gratatouille.tasks.GTask
 @GTask
 internal fun tapmocCheckKotlinStdlibVersions(
   logger: GLogger,
-  warningAsError: Boolean,
+  severity: String,
   kotlinVersion: String?,
   kotlinStdlibVersions: Set<String>,
   output: GOutputFile
 ) {
+  if (severity == "IGNORE") {
+    output.writeText("Tapmoc: check skipped as severity is IGNORE")
+    return
+  }
   if (kotlinVersion == null) {
     output.writeText("Tapmoc: skip checking Kotlin stdlib versions as no target Kotlin version is defined")
     return
@@ -20,7 +24,7 @@ internal fun tapmocCheckKotlinStdlibVersions(
   val supportedVersion = kotlinVersion.toMinorVersion()
   kotlinStdlibVersions.forEach { version ->
     if (version.toMinorVersion() > supportedVersion) {
-      logger.logOrFail(warningAsError, "Found incompatible kotlin-stdlib: '$version'. Maximum supported is '$supportedVersion'. Use `./gradlew dependencies` to investigate the dependency tree.")
+      logger.logOrFail(severity, "Found incompatible kotlin-stdlib: '$version'. Maximum supported is '$supportedVersion'. Use `./gradlew dependencies` to investigate the dependency tree.")
     }
   }
 

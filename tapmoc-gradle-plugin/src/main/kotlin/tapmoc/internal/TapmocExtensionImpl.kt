@@ -8,6 +8,7 @@ import org.gradle.api.artifacts.component.ModuleComponentIdentifier
 import org.gradle.api.file.FileCollection
 import org.gradle.api.internal.DefaultNamedDomainObjectCollection
 import org.gradle.api.provider.Property
+import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.language.base.plugins.LifecycleBasePlugin
 import tapmoc.Severity
@@ -76,46 +77,54 @@ internal abstract class TapmocExtensionImpl(private val project: Project) : Tapm
     return project.files(configurationFor(configuration))
   }
 
-  override fun checkJavaClassFiles(configuration: String, severity: Severity) {
+  override fun checkJavaClassFiles(configuration: String, severity: Provider<Severity>) {
     val checkJavaClassFiles = project.registerTapmocCheckClassFileVersionsTask(
       taskName = lowerCameCase("tapmoc", "check", configuration, "JavaClassFiles"),
-      warningAsError = project.provider { severity == Severity.ERROR },
+      severity = severity.map { it.name },
       javaVersion = javaVersionProvider,
-      jarFiles = project.files(fileCollectionFor(configuration))
+      jarFiles = project.files(fileCollectionFor(configuration)),
     )
     addToCheckTask(checkJavaClassFiles)
   }
 
-  override fun checkJavaClassFiles(severity: Severity) {
+  override fun checkJavaClassFiles(severity: Provider<Severity>) {
     reactToConfigurations(
-      onApi = {},
-      onRuntime = { checkJavaClassFiles(it, severity)}
+      onApi = { checkJavaClassFiles(it, severity) },
+      onRuntime = { checkJavaClassFiles(it, severity) },
     )
   }
 
+  override fun checkJavaClassFiles(severity: Severity) {
+    checkJavaClassFiles(project.provider { severity })
+  }
 
-  override fun checkKotlinMetadata(configuration: String, severity: Severity) {
+
+  override fun checkKotlinMetadata(configuration: String, severity: Provider<Severity>) {
     val checkKotlinMetadatas = project.registerTapmocCheckKotlinMetadataVersionsTask(
       taskName = lowerCameCase("tapmoc", "check", configuration, "KotlinMetadata"),
-      warningAsError = project.provider { severity == Severity.ERROR },
+      severity = severity.map { it.name },
       kotlinVersion = kotlinVersionProvider,
       files = fileCollectionFor(configuration),
     )
     addToCheckTask(checkKotlinMetadatas)
   }
 
-  override fun checkKotlinMetadata(severity: Severity) {
+  override fun checkKotlinMetadata(severity: Provider<Severity>) {
     reactToConfigurations(
-      onApi = {checkKotlinMetadata(it, severity) },
-      onRuntime = {}
+      onApi = { checkKotlinMetadata(it, severity) },
+      onRuntime = {},
     )
   }
 
+  override fun checkKotlinMetadata(severity: Severity) {
+    checkKotlinMetadata(project.provider { severity })
+  }
 
-  override fun checkKotlinStdlibs(configuration: String, severity: Severity) {
+
+  override fun checkKotlinStdlibs(configuration: String, severity: Provider<Severity>) {
     val checkKotlinStdlibs = project.registerTapmocCheckKotlinStdlibVersionsTask(
       taskName = lowerCameCase("tapmoc", "check", configuration, "KotlinStdlib"),
-      warningAsError = project.provider { severity == Severity.ERROR },
+      severity = severity.map { it.name },
       kotlinVersion = kotlinVersionProvider,
       kotlinStdlibVersions = configurationFor(configuration).map {
         it.incoming.resolutionResult.allComponents
@@ -131,11 +140,15 @@ internal abstract class TapmocExtensionImpl(private val project: Project) : Tapm
     addToCheckTask(checkKotlinStdlibs)
   }
 
-  override fun checkKotlinStdlibs(severity: Severity) {
+  override fun checkKotlinStdlibs(severity: Provider<Severity>) {
     reactToConfigurations(
       onApi = { },
-      onRuntime = { checkKotlinStdlibs(it, severity) }
+      onRuntime = { checkKotlinStdlibs(it, severity) },
     )
+  }
+
+  override fun checkKotlinStdlibs(severity: Severity) {
+    checkKotlinStdlibs(project.provider { severity })
   }
 
   override fun checkDependencies() {
@@ -183,6 +196,10 @@ internal abstract class TapmocExtensionImpl(private val project: Project) : Tapm
 
   @Suppress("DEPRECATION")
   override fun checkDependencies(severity: Severity) {
+    checkDependencies(project.provider { severity })
+  }
+
+  override fun checkDependencies(severity: Provider<Severity>) {
     checkJavaClassFiles(severity)
     checkKotlinMetadata(severity)
   }
@@ -190,7 +207,7 @@ internal abstract class TapmocExtensionImpl(private val project: Project) : Tapm
   @Deprecated(
     "Use checkDependencies instead.",
     replaceWith = ReplaceWith("checkDependencies(severity)"),
-    level = DeprecationLevel.ERROR
+    level = DeprecationLevel.ERROR,
   )
   override fun checkApiDependencies(severity: Severity) {
     TODO()
@@ -199,7 +216,7 @@ internal abstract class TapmocExtensionImpl(private val project: Project) : Tapm
   @Deprecated(
     "Use checkDependencies instead.",
     replaceWith = ReplaceWith("checkDependencies(severity)"),
-    level = DeprecationLevel.ERROR
+    level = DeprecationLevel.ERROR,
   )
   override fun checkRuntimeDependencies(severity: Severity) {
     TODO()
