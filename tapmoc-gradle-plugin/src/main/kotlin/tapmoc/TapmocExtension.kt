@@ -141,8 +141,7 @@ interface TapmocExtension {
    * @see checkKotlinStdlibs
    */
   fun checkKotlinStdlibs(severity: Severity)
-
-
+  
   /**
    * This is equivalent to calling `checkJavaClassFiles(runtimeConfiguration, severity)` and `checkKotlinMetadata(apiConfiguration, severity)`.
    *
@@ -150,9 +149,10 @@ interface TapmocExtension {
    * - `runtimeConfiguration` is the outgoing variant containing the runtime dependencies (typically, "apiElements").
    * - `apiConfiguration` is the outgoing variant containing the API dependencies (typically, "runtimeElements").
    *
-   * The actual name of the configurations is guessed depending on the applied plugins (Jvm/kmp/android/etc...).
+   * Tapmoc "reacts" to known configurations such as "apiElements", "runtimeElements", "jvmApiElements", etc... but might not be aware of
+   * all of them. For an example, if you're using custom Android variant names or custom KMP JVM targets.
    *
-   * If the guessing didn't work, call [checkJavaClassFiles] and [checkKotlinMetadata] manually.
+   * In those cases, call [checkJavaClassFiles] and [checkKotlinMetadata] manually.
    *
    * Note: this doesn't call `checkKotlinStdlibs(runtimeConfigurationm, severity)` as kotlin-stdlib is usually upgraded at runtime. One notable exception is Gradle plugins.
    * If you are developing a Gradle plugin, you may want to call `checkKotlinStdlibs(severity)`.

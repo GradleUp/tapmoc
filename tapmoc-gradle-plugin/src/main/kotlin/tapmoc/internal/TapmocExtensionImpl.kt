@@ -6,6 +6,7 @@ import org.gradle.api.UnknownDomainObjectException
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.component.ModuleComponentIdentifier
 import org.gradle.api.file.FileCollection
+import org.gradle.api.internal.DefaultNamedDomainObjectCollection
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.language.base.plugins.LifecycleBasePlugin
@@ -86,7 +87,7 @@ internal abstract class TapmocExtensionImpl(private val project: Project) : Tapm
   }
 
   override fun checkJavaClassFiles(severity: Severity) {
-    reactToPlugins(
+    reactToConfigurations(
       onApi = {},
       onRuntime = { checkJavaClassFiles(it, severity)}
     )
@@ -104,7 +105,7 @@ internal abstract class TapmocExtensionImpl(private val project: Project) : Tapm
   }
 
   override fun checkKotlinMetadata(severity: Severity) {
-    reactToPlugins(
+    reactToConfigurations(
       onApi = {checkKotlinMetadata(it, severity) },
       onRuntime = {}
     )
@@ -131,7 +132,7 @@ internal abstract class TapmocExtensionImpl(private val project: Project) : Tapm
   }
 
   override fun checkKotlinStdlibs(severity: Severity) {
-    reactToPlugins(
+    reactToConfigurations(
       onApi = { },
       onRuntime = { checkKotlinStdlibs(it, severity) }
     )
@@ -141,58 +142,42 @@ internal abstract class TapmocExtensionImpl(private val project: Project) : Tapm
     checkDependencies(Severity.ERROR)
   }
 
-  private fun reactToPlugins(onApi: (String) -> Unit, onRuntime: (String) -> Unit) {
-    var hasJava = false
-    var hasKotlinJvm = false
-    var hasKotlinMultiplatform = false
+  private fun reactToConfigurations(onApi: (String) -> Unit, onRuntime: (String) -> Unit) {
+    val visitedConfigurations = mutableSetOf<String>()
 
-    project.pluginManager.withPlugin("java") {
-      if (!hasKotlinJvm) {
-        onApi("apiElements")
-        onRuntime("runtimeElements")
+    /**
+     * Uses internal APIs. Before that, I tried:
+     * - determining the "good" configurations based on their attributes, and it's a mess that creates resolution errors
+     * - reacting to plugins being applied but in some cases, the configurations are not always registered from `Plugin::apply`
+     *
+     * Instead, "react" to known configuration being added. This is all a giant spaghetti plate, but I have no clue how to make
+     * things better at this point.
+     * If this doesn't work, there is always the explicit API that takes a configuration name.
+     *
+     * See https://github.com/gradle/gradle/issues/25262
+     */
+    @Suppress("UNCHECKED_CAST")
+    (project.configurations as DefaultNamedDomainObjectCollection<Configuration>).whenElementKnown {
+      if (!visitedConfigurations.add(it.name)) {
+        return@whenElementKnown
       }
-      hasJava = true
-    }
-    project.pluginManager.withPlugin("org.jetbrains.kotlin.jvm") {
-      if (!hasJava) {
-        onApi("apiElements")
-        onRuntime("runtimeElements")
-      }
-      hasKotlinJvm = true
-    }
-    project.pluginManager.withPlugin("org.jetbrains.kotlin.multiplatform") {
-      onApi("jvmApiElements")
-      onRuntime("jvmRuntimeElements")
-
-      hasKotlinMultiplatform = true
-    }
-    project.pluginManager.withPlugin("com.android.library") {
-      onApi("releaseApiElements")
-      onRuntime("releaseRuntimeElements")
-
-      hasKotlinMultiplatform = true
-    }
-
-    project.afterEvaluate {
-      if (!hasJava && !hasKotlinJvm && !hasKotlinMultiplatform) {
-        val task = project.tasks.findByName("tapmocError")
-        if (task == null) {
-          val task2 = project.tasks.register("tapmocError") {
-            it.doFirst {
-              error("Tapmoc: checkDependencies() didn't find any supported plugin. Please call `checkJavaClassFiles()` and `checkKotlinMetadata()` instead.")
-            }
-          }
-          addToCheckTask(task2)
-        }
+      when(it.name) {
+        "apiElements" -> onApi(it.name)
+        "runtimeElements" -> onRuntime(it.name)
+        "jvmApiElements" -> onApi(it.name)
+        "jvmRuntimeElements" -> onRuntime(it.name)
+        "releaseApiElements" -> onApi(it.name)
+        "releaseRuntimeElements" -> onRuntime(it.name)
+        "debugApiElements" -> onApi(it.name)
+        "debugRuntimeElements" -> onRuntime(it.name)
       }
     }
   }
+
   @Suppress("DEPRECATION")
   override fun checkDependencies(severity: Severity) {
-    reactToPlugins(
-      onApi = { checkKotlinMetadata(it, severity) },
-      onRuntime = { checkJavaClassFiles(it, severity) }
-    )
+    checkJavaClassFiles(severity)
+    checkKotlinMetadata(severity)
   }
 
   @Deprecated(
