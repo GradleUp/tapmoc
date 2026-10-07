@@ -18,7 +18,19 @@ pluginManagement {
         includeGroupByRegex("com\\.gradleup\\..*")
       }
     }
+    exclusiveContent {
+      forRepository { gradlePluginPortal() }
+      filter {
+        includeModule("org.gradle.toolchains.foojay-resolver-convention", "org.gradle.toolchains.foojay-resolver-convention.gradle.plugin")
+        includeModule("org.gradle.toolchains", "foojay-resolver")
+      }
+    }
   }
+}
+
+plugins {
+  // Auto-provisions the JDK toolchains
+  id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
 }
 
 include(":tapmoc-gradle-plugin")

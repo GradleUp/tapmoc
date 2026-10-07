@@ -56,20 +56,20 @@ internal abstract class TapmocExtensionImpl(private val project: Project) : Tapm
 
   private fun configurationFor(configuration: String): NamedDomainObjectProvider<Configuration> {
     val name = lowerCameCase("tapmoc", configuration)
-    var tapmocConfiguration = try {
+    val existing: NamedDomainObjectProvider<Configuration>? = try {
       project.configurations.named(name)
     } catch (_: UnknownDomainObjectException) {
       null
     }
-    if (tapmocConfiguration == null) {
-      tapmocConfiguration = project.configurations.register(name) {
-        it.isCanBeConsumed = false
-        it.isCanBeResolved = true
-        it.isVisible = false
-        it.extendsFrom(project.configurations.getByName(configuration))
-      }
+    if (existing != null) {
+      return existing
     }
-    return tapmocConfiguration
+    return project.configurations.register(name) {
+      it.isCanBeConsumed = false
+      it.isCanBeResolved = true
+      it.isVisible = false
+      it.extendsFrom(project.configurations.getByName(configuration))
+    }
   }
 
   private fun fileCollectionFor(configuration: String): FileCollection {
@@ -156,21 +156,28 @@ internal abstract class TapmocExtensionImpl(private val project: Project) : Tapm
      *
      * See https://github.com/gradle/gradle/issues/25262
      */
+    val onConfiguration = { name: String ->
+      if (visitedConfigurations.add(name)) {
+        when (name) {
+          "apiElements" -> onApi(name)
+          "runtimeElements" -> onRuntime(name)
+          "jvmApiElements" -> onApi(name)
+          "jvmRuntimeElements" -> onRuntime(name)
+          "releaseApiElements" -> onApi(name)
+          "releaseRuntimeElements" -> onRuntime(name)
+          "debugApiElements" -> onApi(name)
+          "debugRuntimeElements" -> onRuntime(name)
+        }
+      }
+    }
+
+    // Handle the existing configurations from a snapshot: the callbacks create configurations
+    // and Gradle 8.0 throws a ConcurrentModificationException if that happens while whenElementKnown() replays them.
+    project.configurations.names.toList().forEach(onConfiguration)
+
     @Suppress("UNCHECKED_CAST")
     (project.configurations as DefaultNamedDomainObjectCollection<Configuration>).whenElementKnown {
-      if (!visitedConfigurations.add(it.name)) {
-        return@whenElementKnown
-      }
-      when(it.name) {
-        "apiElements" -> onApi(it.name)
-        "runtimeElements" -> onRuntime(it.name)
-        "jvmApiElements" -> onApi(it.name)
-        "jvmRuntimeElements" -> onRuntime(it.name)
-        "releaseApiElements" -> onApi(it.name)
-        "releaseRuntimeElements" -> onRuntime(it.name)
-        "debugApiElements" -> onApi(it.name)
-        "debugRuntimeElements" -> onRuntime(it.name)
-      }
+      onConfiguration(it.name)
     }
   }
 

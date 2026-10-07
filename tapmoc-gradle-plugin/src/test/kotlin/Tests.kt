@@ -1,18 +1,7 @@
-import java.io.File
-import java.util.Properties
 import kotlin.test.Test
-import org.gradle.testkit.runner.GradleRunner
 import org.junit.Assert.assertTrue
 
 class Tests {
-  private fun gradleRunner(dir: File, vararg args: String): GradleRunner {
-    return GradleRunner.create()
-      .withProjectDir(dir)
-      .withDebug(false)
-      .withArguments(*args)
-      .forwardOutput()
-  }
-
   @Test
   fun wrongJavaBytecodeIsDetected() {
     withTestProject("java") {
@@ -47,29 +36,4 @@ class Tests {
       }
     }
   }
-}
-
-
-private fun withTestProject(name: String, block: (File) -> Unit) {
-  val src = File("testProjects/$name")
-  val dst = File("build/testProject")
-  dst.deleteRecursively()
-
-  src.copyRecursively(dst)
-
-  dst.walk().onLeave {
-    if (it.isDirectory && it.name == "build") {
-      it.deleteRecursively()
-    }
-  }.count() // count is just used to collect the sequence
-
-  val currentVersion = Properties().apply {
-    File("../librarian.root.properties").reader().use {
-      load(it)
-    }
-  }
-  dst.resolve("build.gradle.kts").let {
-    it.writeText(it.readText().replace("PLACEHOLDER", currentVersion.get("pom.version").toString()))
-  }
-  block(dst)
 }

@@ -141,7 +141,7 @@ interface TapmocExtension {
    * @see checkKotlinStdlibs
    */
   fun checkKotlinStdlibs(severity: Severity)
-  
+
   /**
    * This is equivalent to calling `checkJavaClassFiles(runtimeConfiguration, severity)` and `checkKotlinMetadata(apiConfiguration, severity)`.
    *

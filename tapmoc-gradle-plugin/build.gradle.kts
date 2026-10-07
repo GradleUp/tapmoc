@@ -64,10 +64,49 @@ dependencies {
 
 gratatouille {
   addDependencies = false
+  // for included builds
   pluginLocalPublication("com.gradleup.tapmoc")
+  // for publishToMavenLocal
+  pluginMarker("com.gradleup.tapmoc")
+}
+
+/**
+ * Gradle 8.0 does not run on recent JDKs (it supports up to Java 19), so its tests live in a separate
+ * source set that runs on a Java 17 toolchain.
+ */
+val gradle8TestCompilation = kotlin.target.compilations.create("gradle8Test") {
+  associateWith(kotlin.target.compilations.getByName("test"))
+}
+
+dependencies {
+  add(gradle8TestCompilation.implementationConfigurationName, gradleTestKit())
+  add(gradle8TestCompilation.implementationConfigurationName, kotlin("test"))
+}
+
+val gradle8Test = tasks.register<Test>("gradle8Test") {
+  group = "verification"
+  testClassesDirs = gradle8TestCompilation.output.classesDirs
+  classpath = gradle8TestCompilation.output.allOutputs +
+    gradle8TestCompilation.runtimeDependencyFiles +
+    kotlin.target.compilations.getByName("test").output.allOutputs
+  javaLauncher.set(javaToolchains.launcherFor {
+    languageVersion.set(JavaLanguageVersion.of(17))
+  })
+}
+
+tasks.named("check") {
+  dependsOn(gradle8Test)
+}
+
+val cleanTestProjects = tasks.register<Delete>("cleanTestProjects") {
+  description = "Deletes the test projects left over by previous (failed) test runs."
+  delete(layout.buildDirectory.map { buildDir ->
+    buildDir.asFile.listFiles().orEmpty().filter { it.name.startsWith("testProject-") }
+  })
 }
 
 tasks.withType<Test>().configureEach {
+  dependsOn(cleanTestProjects)
   dependsOn("publishAllPublicationsToLocalRepository")
   dependsOn(":tapmoc-tasks:publishAllPublicationsToLocalRepository")
 }
