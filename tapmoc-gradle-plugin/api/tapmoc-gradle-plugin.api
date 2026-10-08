@@ -40,3 +40,8 @@ public abstract class com/gradleup/tapmoc/TapmocPlugin : org/gradle/api/Plugin {
 	public fun apply (Lorg/gradle/api/Project;)V
 }
 
+public final class tapmoc/CompatibilityKt {
+	public static final fun configureJavaCompatibility (Lorg/gradle/api/Project;I)V
+	public static final fun configureKotlinCompatibility (Lorg/gradle/api/Project;Ljava/lang/String;)V
+}
+
