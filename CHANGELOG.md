@@ -1,3 +1,37 @@
+# 0.5.0
+_2026-10-08_
+
+Tapmoc 0.5.0 changes the internal machinery that tried to auto-detect the api/runtime outgoing configuration for dependency checking. Instead of using Gradle attribute-aware resolution, Tapmoc 0.5.0 instead acts on "known" outgoing configuration names such as `"apiElements"`, `"runtimeElements"`, `"releaseApiElements"`, etc...
+
+Relying only on attributes was creating hard to diagnose resolution issues (see https://github.com/GradleUp/tapmoc/issues/100, https://github.com/gradle/gradle/issues/12126 and https://github.com/liutikas/gmm-wiki).
+
+This change should be transparent for most cases unless you declare custom outgoing variants. In those cases, you'll need to specify the outgoing configuration name explicitly:
+
+```kotlin
+tapmoc {
+  checkJavaClassfiles("java8ApiElements", provider { Severity.ERROR })
+  checkJavaClassfiles("java8RuntimeElements", provider { Severity.ERROR })
+  checkKotlinMetadata("java8ApiElements", provider { Severity.ERROR })
+}
+```
+
+Tapmoc 0.5.0 also changes the package name from `tapmoc` to `com.gradleup.tapmoc` to avoid a conflict with the top-level `tapmoc` extension in Gradle scripts. Update your imports:
+
+```kotlin
+// Replace 
+import Severity.ERROR
+// With
+import com.gradleup.tapmoc.Severity.ERROR
+
+```
+## All changes
+* [BREAKING] The package name is now `com.gradleup.tapmoc` (was `tapmoc`) to avoid a conflict with the top-level `tapmoc` extension in Gradle scripts. Update your imports (#115)
+* [FIX] Ignore `module-info.class` and class files with a non lower-case `.class` extension when checking class file versions (#109)
+* [FIX] Robustify the handling of dependency checks (#107, #112)
+* [NEW] Add `tapmocCheckDependencies`, a task that runs all the Tapmoc dependency checks (Kotlin stdlib, Kotlin metadata and Java class files versions) (#116)
+* [NEW] Add `checkJavaClassFiles()` and `checkKotlinMetadata()` overloads taking a `Provider<Severity>` (#114)
+* [NEW] Support Gradle 8.0 (#112)
+
 
 # 0.4.2
 _2026-04-12_
