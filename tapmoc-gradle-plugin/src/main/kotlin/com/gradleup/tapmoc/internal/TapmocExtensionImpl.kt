@@ -2,6 +2,7 @@ package com.gradleup.tapmoc.internal
 
 import org.gradle.api.NamedDomainObjectProvider
 import org.gradle.api.Project
+import org.gradle.api.Task
 import org.gradle.api.UnknownDomainObjectException
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.component.ModuleComponentIdentifier
@@ -23,7 +24,13 @@ internal abstract class TapmocExtensionImpl(private val project: Project) : Tapm
   abstract val kotlinVersionProvider: Property<String>
   abstract val javaVersionProvider: Property<Int>
 
+  private val checkDependenciesTask: TaskProvider<Task> = project.tasks.register("tapmocCheckDependencies") {
+    it.group = LifecycleBasePlugin.VERIFICATION_GROUP
+    it.description = "Runs all the Tapmoc tasks that check dependencies (Kotlin stdlib, Kotlin metadata and Java class files versions)"
+  }
+
   private fun addToCheckTask(taskProvider: TaskProvider<*>) {
+    checkDependenciesTask.configure { it.dependsOn(taskProvider) }
     project.plugins.withType(LifecycleBasePlugin::class.java) {
       project.tasks.named(LifecycleBasePlugin.CHECK_TASK_NAME).configure {
         it.dependsOn(taskProvider)
