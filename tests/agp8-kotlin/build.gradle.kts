@@ -1,6 +1,6 @@
 import org.jetbrains.kotlin.gradle.dsl.KotlinProjectExtension
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import tapmoc.Severity
+import com.gradleup.tapmoc.Severity
 
 plugins {
   alias(libs.plugins.agp8)

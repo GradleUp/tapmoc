@@ -1,4 +1,4 @@
-import tapmoc.Severity
+import com.gradleup.tapmoc.Severity
 
 plugins {
   alias(libs.plugins.agp9.kmp)

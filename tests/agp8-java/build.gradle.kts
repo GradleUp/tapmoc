@@ -1,5 +1,5 @@
 import com.android.build.gradle.internal.tasks.factory.dependsOn
-import tapmoc.Severity
+import com.gradleup.tapmoc.Severity
 
 plugins {
   alias(libs.plugins.agp8)

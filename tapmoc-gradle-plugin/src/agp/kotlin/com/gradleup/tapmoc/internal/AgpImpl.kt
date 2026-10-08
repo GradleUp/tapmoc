@@ -1,4 +1,4 @@
-package tapmoc.internal
+package com.gradleup.tapmoc.internal
 
 import com.android.build.api.dsl.CommonExtension
 import org.gradle.api.Action

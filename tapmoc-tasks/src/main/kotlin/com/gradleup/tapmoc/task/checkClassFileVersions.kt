@@ -1,4 +1,4 @@
-package tapmoc.task
+package com.gradleup.tapmoc.task
 
 import gratatouille.tasks.GInputFiles
 import gratatouille.tasks.GLogger

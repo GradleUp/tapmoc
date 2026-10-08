@@ -1,6 +1,6 @@
-package tapmoc
+package com.gradleup.tapmoc
 
-import tapmoc.internal.TapmocExtensionImpl
+import com.gradleup.tapmoc.internal.TapmocExtensionImpl
 import gratatouille.GPlugin
 import org.gradle.api.Project
 

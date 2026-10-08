@@ -1,4 +1,4 @@
-package tapmoc
+package com.gradleup.tapmoc
 
 import org.gradle.api.provider.Provider
 

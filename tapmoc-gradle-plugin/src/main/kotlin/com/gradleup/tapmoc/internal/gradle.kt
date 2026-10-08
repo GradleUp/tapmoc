@@ -1,4 +1,4 @@
-package tapmoc.internal
+package com.gradleup.tapmoc.internal
 
 internal fun kotlinVersionForGradle(major: Int): String {
   /**

@@ -1,10 +1,10 @@
-package tapmoc
+package com.gradleup.tapmoc
 
-import tapmoc.internal.onAgp
+import com.gradleup.tapmoc.internal.onAgp
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 import org.gradle.api.tasks.compile.JavaCompile
-import tapmoc.internal.onKgp
+import com.gradleup.tapmoc.internal.onKgp
 
 fun Project.configureJavaCompatibility(
   javaVersion: Int,

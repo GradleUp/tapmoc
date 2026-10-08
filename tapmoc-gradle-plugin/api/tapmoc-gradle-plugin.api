@@ -1,32 +1,32 @@
-public final class tapmoc/CompatibilityKt {
+public final class com/gradleup/tapmoc/CompatibilityKt {
 	public static final fun configureJavaCompatibility (Lorg/gradle/api/Project;I)V
 	public static final fun configureKotlinCompatibility (Lorg/gradle/api/Project;Ljava/lang/String;)V
 }
 
-public final class tapmoc/Severity : java/lang/Enum {
-	public static final field ERROR Ltapmoc/Severity;
-	public static final field IGNORE Ltapmoc/Severity;
-	public static final field WARNING Ltapmoc/Severity;
+public final class com/gradleup/tapmoc/Severity : java/lang/Enum {
+	public static final field ERROR Lcom/gradleup/tapmoc/Severity;
+	public static final field IGNORE Lcom/gradleup/tapmoc/Severity;
+	public static final field WARNING Lcom/gradleup/tapmoc/Severity;
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
-	public static fun valueOf (Ljava/lang/String;)Ltapmoc/Severity;
-	public static fun values ()[Ltapmoc/Severity;
+	public static fun valueOf (Ljava/lang/String;)Lcom/gradleup/tapmoc/Severity;
+	public static fun values ()[Lcom/gradleup/tapmoc/Severity;
 }
 
-public abstract interface class tapmoc/TapmocExtension {
-	public abstract fun checkApiDependencies (Ltapmoc/Severity;)V
+public abstract interface class com/gradleup/tapmoc/TapmocExtension {
+	public abstract fun checkApiDependencies (Lcom/gradleup/tapmoc/Severity;)V
 	public abstract fun checkDependencies ()V
+	public abstract fun checkDependencies (Lcom/gradleup/tapmoc/Severity;)V
 	public abstract fun checkDependencies (Lorg/gradle/api/provider/Provider;)V
-	public abstract fun checkDependencies (Ltapmoc/Severity;)V
+	public abstract fun checkJavaClassFiles (Lcom/gradleup/tapmoc/Severity;)V
 	public abstract fun checkJavaClassFiles (Ljava/lang/String;Lorg/gradle/api/provider/Provider;)V
 	public abstract fun checkJavaClassFiles (Lorg/gradle/api/provider/Provider;)V
-	public abstract fun checkJavaClassFiles (Ltapmoc/Severity;)V
+	public abstract fun checkKotlinMetadata (Lcom/gradleup/tapmoc/Severity;)V
 	public abstract fun checkKotlinMetadata (Ljava/lang/String;Lorg/gradle/api/provider/Provider;)V
 	public abstract fun checkKotlinMetadata (Lorg/gradle/api/provider/Provider;)V
-	public abstract fun checkKotlinMetadata (Ltapmoc/Severity;)V
+	public abstract fun checkKotlinStdlibs (Lcom/gradleup/tapmoc/Severity;)V
 	public abstract fun checkKotlinStdlibs (Ljava/lang/String;Lorg/gradle/api/provider/Provider;)V
 	public abstract fun checkKotlinStdlibs (Lorg/gradle/api/provider/Provider;)V
-	public abstract fun checkKotlinStdlibs (Ltapmoc/Severity;)V
-	public abstract fun checkRuntimeDependencies (Ltapmoc/Severity;)V
+	public abstract fun checkRuntimeDependencies (Lcom/gradleup/tapmoc/Severity;)V
 	public abstract fun gradle (Ljava/lang/String;)V
 	public abstract fun java (I)V
 	public abstract fun javaVersionForGradle (Ljava/lang/String;)I
@@ -34,7 +34,7 @@ public abstract interface class tapmoc/TapmocExtension {
 	public abstract fun kotlinVersionForGradle (Ljava/lang/String;)Ljava/lang/String;
 }
 
-public abstract class tapmoc/TapmocPlugin : org/gradle/api/Plugin {
+public abstract class com/gradleup/tapmoc/TapmocPlugin : org/gradle/api/Plugin {
 	public fun <init> ()V
 	public synthetic fun apply (Ljava/lang/Object;)V
 	public fun apply (Lorg/gradle/api/Project;)V

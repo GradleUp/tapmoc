@@ -1,7 +1,7 @@
 import gratatouille.tasks.FileWithPath
 import gratatouille.tasks.GLogger
 import org.junit.Test
-import tapmoc.task.tapmocCheckClassFileVersions
+import com.gradleup.tapmoc.task.tapmocCheckClassFileVersions
 import java.io.File
 import java.net.URI
 import kotlin.test.assertFailsWith

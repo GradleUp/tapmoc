@@ -1,11 +1,11 @@
-import tapmoc.Severity
+import com.gradleup.tapmoc.Severity
 
 plugins {
   id("java")
   id("com.gradleup.tapmoc").version("PLACEHOLDER")
 }
 
-extensions.getByType(tapmoc.TapmocExtension::class.java).apply {
+extensions.getByType(com.gradleup.tapmoc.TapmocExtension::class.java).apply {
   java(8)
   checkDependencies(Severity.ERROR)
 }
