@@ -1,4 +1,4 @@
-package tapmoc.internal
+package com.gradleup.tapmoc.internal
 
 import org.gradle.api.JavaVersion
 

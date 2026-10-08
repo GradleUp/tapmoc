@@ -2,7 +2,7 @@ import javax.tools.DiagnosticCollector
 import javax.tools.JavaFileObject
 import javax.tools.StandardLocation
 import javax.tools.ToolProvider
-import tapmoc.Severity
+import com.gradleup.tapmoc.Severity
 
 buildscript {
   dependencies {
@@ -15,7 +15,7 @@ plugins {
 }
 
 pluginManager.apply("com.gradleup.tapmoc")
-extensions.getByType(tapmoc.TapmocExtension::class.java).apply {
+extensions.getByType(com.gradleup.tapmoc.TapmocExtension::class.java).apply {
   java(8)
   kotlin("2.0.0") // This should be a no-op
   checkDependencies(Severity.ERROR)

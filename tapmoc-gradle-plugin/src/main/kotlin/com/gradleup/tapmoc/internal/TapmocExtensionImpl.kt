@@ -1,4 +1,4 @@
-package tapmoc.internal
+package com.gradleup.tapmoc.internal
 
 import org.gradle.api.NamedDomainObjectProvider
 import org.gradle.api.Project
@@ -11,13 +11,13 @@ import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.language.base.plugins.LifecycleBasePlugin
-import tapmoc.Severity
-import tapmoc.TapmocExtension
-import tapmoc.configureJavaCompatibility
-import tapmoc.configureKotlinCompatibility
-import tapmoc.task.registerTapmocCheckClassFileVersionsTask
-import tapmoc.task.registerTapmocCheckKotlinMetadataVersionsTask
-import tapmoc.task.registerTapmocCheckKotlinStdlibVersionsTask
+import com.gradleup.tapmoc.Severity
+import com.gradleup.tapmoc.TapmocExtension
+import com.gradleup.tapmoc.configureJavaCompatibility
+import com.gradleup.tapmoc.configureKotlinCompatibility
+import com.gradleup.tapmoc.task.registerTapmocCheckClassFileVersionsTask
+import com.gradleup.tapmoc.task.registerTapmocCheckKotlinMetadataVersionsTask
+import com.gradleup.tapmoc.task.registerTapmocCheckKotlinStdlibVersionsTask
 
 internal abstract class TapmocExtensionImpl(private val project: Project) : TapmocExtension {
   abstract val kotlinVersionProvider: Property<String>
