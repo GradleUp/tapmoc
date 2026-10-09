@@ -183,6 +183,8 @@ internal abstract class TapmocExtensionImpl(private val project: Project) : Tapm
           "runtimeElements" -> onRuntime(name)
           "jvmApiElements" -> onApi(name)
           "jvmRuntimeElements" -> onRuntime(name)
+          "androidApiElements" -> onApi(name)
+          "androidRuntimeElements" -> onRuntime(name)
           "releaseApiElements" -> onApi(name)
           "releaseRuntimeElements" -> onRuntime(name)
           "debugApiElements" -> onApi(name)
