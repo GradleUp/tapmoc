@@ -24,18 +24,33 @@ internal abstract class TapmocExtensionImpl(private val project: Project) : Tapm
   abstract val kotlinVersionProvider: Property<String>
   abstract val javaVersionProvider: Property<Int>
 
-  private val checkDependenciesTask: TaskProvider<Task> = project.tasks.register("tapmocCheckDependencies") {
-    it.group = LifecycleBasePlugin.VERIFICATION_GROUP
-    it.description = "Runs all the Tapmoc tasks that check dependencies (Kotlin stdlib, Kotlin metadata and Java class files versions)"
-  }
-
-  private fun addToCheckTask(taskProvider: TaskProvider<*>) {
-    checkDependenciesTask.configure { it.dependsOn(taskProvider) }
+  private val checkDependenciesTask: TaskProvider<Task> by lazy {
+    val checkDependenciesTaskProvider = project.tasks.register("tapmocCheckDependencies") {
+      it.group = LifecycleBasePlugin.VERIFICATION_GROUP
+      it.description = "Runs all the Tapmoc tasks that check dependencies (Kotlin stdlib, Kotlin metadata and Java class files versions)"
+    }
     project.plugins.withType(LifecycleBasePlugin::class.java) {
       project.tasks.named(LifecycleBasePlugin.CHECK_TASK_NAME).configure {
-        it.dependsOn(taskProvider)
+        it.dependsOn(checkDependenciesTaskProvider)
       }
     }
+
+    checkDependenciesTaskProvider
+  }
+
+
+  private fun addToLifecycleTasks(lifecycleName: String, description: String, taskProvider: TaskProvider<*>) {
+    val lifecycleTask = try {
+      project.tasks.named(lifecycleName)
+    } catch (e: UnknownDomainObjectException) {
+      project.tasks.register(lifecycleName) {
+        it.group = LifecycleBasePlugin.VERIFICATION_GROUP
+        it.description = description
+      }.also { task ->
+        checkDependenciesTask.configure { it.dependsOn(task) }
+      }
+    }
+    lifecycleTask.configure { it.dependsOn(taskProvider) }
   }
 
   override fun java(version: Int) {
@@ -91,7 +106,7 @@ internal abstract class TapmocExtensionImpl(private val project: Project) : Tapm
       javaVersion = javaVersionProvider,
       jarFiles = project.files(fileCollectionFor(configuration)),
     )
-    addToCheckTask(checkJavaClassFiles)
+    addToLifecycleTasks("tapmocCheckClassFileVersions", "Runs all the Tapmoc tasks that check Java class file versions", checkJavaClassFiles)
   }
 
   override fun checkJavaClassFiles(severity: Provider<Severity>) {
@@ -113,7 +128,7 @@ internal abstract class TapmocExtensionImpl(private val project: Project) : Tapm
       kotlinVersion = kotlinVersionProvider,
       files = fileCollectionFor(configuration),
     )
-    addToCheckTask(checkKotlinMetadatas)
+    addToLifecycleTasks("tapmocCheckKotlinMetadataVersions", "Runs all the Tapmoc tasks that check Kotlin metadata versions", checkKotlinMetadatas)
   }
 
   override fun checkKotlinMetadata(severity: Provider<Severity>) {
@@ -144,7 +159,7 @@ internal abstract class TapmocExtensionImpl(private val project: Project) : Tapm
       },
     )
 
-    addToCheckTask(checkKotlinStdlibs)
+    addToLifecycleTasks("tapmocCheckKotlinStdlibVersions", "Runs all the Tapmoc tasks that check Kotlin stdlib versions", checkKotlinStdlibs)
   }
 
   override fun checkKotlinStdlibs(severity: Provider<Severity>) {
